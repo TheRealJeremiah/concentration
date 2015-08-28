@@ -1,0 +1,15 @@
+<h1>hello world</h1>
+<div class="hud">
+  Score: <span class="current-score">0</span><br>
+  Card in deck: <span class="current-deck">30</span>
+</div>
+<div class="board">
+</div>
+<script type="text/javascript">
+  var game = new Concentration();
+  game.setup();
+  $('.board').on('click', '.card', function (event) {
+    game.handleCardClick($(event.currentTarget).index());
+    $(event.currentTarget).toggleClass('highlighted');
+  })
+</script>
