@@ -92,8 +92,8 @@ Concentration.prototype.handleCardClick = function(cardIdx) {
 
 Concentration.prototype.handleSelection = function() {
   this.canClick = false;
-
   if (this.selectedCards.length !== 2) { return; }
+
   this.selectedCards.sort();
   var idx1 = this.selectedCards[0];
   var idx2 = this.selectedCards[1];
@@ -104,7 +104,7 @@ Concentration.prototype.handleSelection = function() {
   var card2 = this.cards[idx2];
   $('.card').eq(idx2).removeClass('back').addClass('front').html(this.numToCard(card2))
 
-  // update the cards shown
+  // update the cards based on if they match
   if ((card1 -1) % 13 === (card2 -1) % 13) {
     this.score += 1;
     var newCards = this.twoCards();
