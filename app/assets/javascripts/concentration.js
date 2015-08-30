@@ -3,11 +3,6 @@ function Concentration() {
 }
 
 Concentration.prototype.setup = function() {
-  $('.board').empty();
-  for (var i=0; i<22; i++) {
-    $('.board').append('<div class="card back">' + '' + '</div>');
-  }
-
   $('.board').on('click', '.card', function (event) {
     if (this.canClick) {
       $(event.currentTarget).toggleClass('highlighted');
@@ -23,6 +18,14 @@ Concentration.prototype.newGame = function() {
   this.cards = [];
   this.dealCards();
   this.selectedCards = [];
+
+  $('.current-score').html(this.score);
+  $('.current-deck').html(this.deck.length);
+
+  $('.board').empty();
+  for (var i=0; i<22; i++) {
+    $('.board').append('<div class="card back"></div>');
+  }
 }
 
 Concentration.prototype.numToCard = function(n) {
@@ -71,6 +74,9 @@ Concentration.prototype.randomDeck = function() {
 
 Concentration.prototype.handleCardClick = function(cardIdx) {
   if (this.selectedCards.length >= 2) { return; }
+  if (this.selectedCards.length == 0) {
+    $('.card').removeClass('front back').addClass('back').empty();
+  }
   var cardSelectedIdx = this.selectedCards.indexOf(cardIdx);
   if (cardSelectedIdx > -1) {
     this.selectedCards.splice(cardSelectedIdx, 1);
@@ -110,7 +116,7 @@ Concentration.prototype.handleSelection = function() {
       setTimeout(function () {
         $('.front').remove();
         this.canClick = true;
-      }, 1000);
+      }.bind(this), 1000);
 
     } else if (newCards.length === 1) {
       this.cards.splice(idx2,1);
@@ -118,7 +124,7 @@ Concentration.prototype.handleSelection = function() {
         $('.front').first().remove();
         $('.card').removeClass('front back').addClass('back').empty();
         this.canClick = true;
-      }, 1000);
+      }.bind(this), 1000);
 
       this.cards[idx1] = newCards[0]
     } else if (newCards.length === 2) {
@@ -127,14 +133,11 @@ Concentration.prototype.handleSelection = function() {
       setTimeout(function() {
         $('.card').removeClass('front back').addClass('back').empty();
         this.canClick = true;
-      }, 1000);
+      }.bind(this), 1000);
     }
   } else {
     this.score -= 1;
-    setTimeout(function() {
-      $('.card').removeClass('front back').addClass('back').empty();
-      this.canClick = true;
-    }, 2000);
+    this.canClick = true;
   }
 
   this.selectedCards = [];
@@ -145,7 +148,7 @@ Concentration.prototype.updateGameState = function() {
   $('.current-score').html(this.score);
   $('.current-deck').html(this.deck.length);
   if (this.gameOver()) {
-    alert('game over!')
+    $('#gameOver').modal()
   }
 }
 

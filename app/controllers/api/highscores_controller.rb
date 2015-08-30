@@ -8,7 +8,7 @@ class Api::HighscoresController < ApplicationController
     if highscore.save
       render json: highscore
     else
-      render json: highscore.errors.full_messages, status: 500
+      render json: highscore.errors.full_messages, status: 422
     end
   end
 

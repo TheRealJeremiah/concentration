@@ -1,10 +1,10 @@
 <h1>Concentration!</h1>
 <div class="hud">
-  Current score: <span class="current-score">0</span><br>
-  Cards left in deck: <span class="current-deck">30</span><br>
   <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#highscores">
     View high scores
-  </button>
+  </button><br>
+  Current score: <span class="current-score">0</span><br>
+  Cards left in deck: <span class="current-deck">30</span>
 </div>
 <div class="board">
 </div>
@@ -14,7 +14,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">High scores</h4>
+        <h4 class="modal-title">High scores</h4>
       </div>
       <div class="modal-body">
         <table class="table">
@@ -28,9 +28,29 @@
   </div>
 </div>
 
+<div class="modal fade" id="gameOver" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Game over! You scored points!</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+        </ul>
+        <input type="text" class="form-control" placeholder="Your 3 character name" id="inputName">
+        <button type="button" class="btn btn-default" id="submitScore">Submit score!</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">New game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="text/javascript">
-  var game = new Concentration();
-  game.setup();
+  var game = new Concentration()
+  game.setup()
 
   $('#highscores').on('show.bs.modal', function (event) {
     var modal = $(this)
@@ -44,5 +64,38 @@
         }
       }
     })
+  })
+
+  $('#gameOver').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    modal.find('.modal-title').text('Game over! You scored ' + game.score + ' points!')
+    var alreadySubmitted = false;
+    modal.find('#submitScore').on('click', function (event) {
+      if (alreadySubmitted) { return; }
+      var input = $('#inputName').val()
+      var form = {highscore: {name: input, score: game.score}}
+      $.ajax({
+        type: 'POST',
+        url: '/api/highscores',
+        data: form,
+        success: function () {
+          alreadySubmitted = true;
+          modal.find('.list-group').empty()
+          modal.find('.list-group').append('<li class="list-group-item list-group-item-success">Successfully submitted score!</li>')
+        },
+        // ideally we would add some client side validations
+        error: function (error) {
+          var err = error.responseJSON
+          modal.find('.list-group').empty()
+          for(var i=0; i<err.length; i++) {
+            modal.find('.list-group').append('<li class="list-group-item list-group-item-danger">' + err[i] + '</li>')
+          }
+        }
+      })
+    })
+  })
+
+  $('#gameOver').on('hide.bs.modal', function () {
+    game.newGame()
   })
 </script>
