@@ -3,22 +3,34 @@ function Concentration() {
 }
 
 Concentration.prototype.setup = function() {
+  $('.board').empty();
   for (var i=0; i<22; i++) {
-    $('.board').append('<div class="card back">' + (this.cards[i] -1) % 13 + '</div>');
+    $('.board').append('<div class="card back">' + '' + '</div>');
   }
 
   $('.board').on('click', '.card', function (event) {
-    $(event.currentTarget).toggleClass('highlighted');
-    game.handleCardClick($(event.currentTarget).index());
-  })
+    if (this.canClick) {
+      $(event.currentTarget).toggleClass('highlighted');
+      game.handleCardClick($(event.currentTarget).index());
+    }
+  }.bind(this))
 }
 
 Concentration.prototype.newGame = function() {
+  this.canClick = true;
   this.score = 0;
   this.deck = this.randomDeck();
   this.cards = [];
   this.dealCards();
   this.selectedCards = [];
+}
+
+Concentration.prototype.numToCard = function(n) {
+  // assume 0 <= num <= 51
+  var num = n-1;
+  var suits = ["spades", "hearts", "diamonds", "clubs"];
+  var ranks = ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"]
+  return ranks[num % 13] + " of " + suits[Math.floor(num/13)];
 }
 
 Concentration.prototype.dealCards = function() {
@@ -40,7 +52,7 @@ Concentration.prototype.twoCards = function() {
 Concentration.prototype.randomDeck = function() {
   // create deck
   var deck = [];
-  for(var i=0; i<24; i++) {
+  for(var i=0; i<52; i++) {
     deck.push(i+1);
   }
   // shuffle deck with knuth shuffle
@@ -59,9 +71,6 @@ Concentration.prototype.randomDeck = function() {
 
 Concentration.prototype.handleCardClick = function(cardIdx) {
   if (this.selectedCards.length >= 2) { return; }
-  if (this.selectedCards.length === 0) {
-    $('.card').removeClass('front back').addClass('back').empty();
-  }
   var cardSelectedIdx = this.selectedCards.indexOf(cardIdx);
   if (cardSelectedIdx > -1) {
     this.selectedCards.splice(cardSelectedIdx, 1);
@@ -76,17 +85,20 @@ Concentration.prototype.handleCardClick = function(cardIdx) {
 }
 
 Concentration.prototype.handleSelection = function() {
+  this.canClick = false;
+
   if (this.selectedCards.length !== 2) { return; }
   this.selectedCards.sort();
   var idx1 = this.selectedCards[0];
   var idx2 = this.selectedCards[1];
 
+  // show the face of the selected cards
   var card1 = this.cards[idx1];
-  $('.card').eq(idx1).removeClass('back').addClass('front').html((card1 -1) % 13)
+  $('.card').eq(idx1).removeClass('back').addClass('front').html(this.numToCard(card1))
   var card2 = this.cards[idx2];
-  $('.card').eq(idx2).removeClass('back').addClass('front').html((card2 -1) % 13)
+  $('.card').eq(idx2).removeClass('back').addClass('front').html(this.numToCard(card2))
 
-  // cards match but are different suit
+  // update the cards shown
   if ((card1 -1) % 13 === (card2 -1) % 13) {
     this.score += 1;
     var newCards = this.twoCards();
@@ -97,21 +109,32 @@ Concentration.prototype.handleSelection = function() {
       this.cards.splice(idx1,1);
       setTimeout(function () {
         $('.front').remove();
+        this.canClick = true;
       }, 1000);
 
     } else if (newCards.length === 1) {
       this.cards.splice(idx2,1);
       setTimeout(function() {
-        $('.front').remove();
+        $('.front').first().remove();
+        $('.card').removeClass('front back').addClass('back').empty();
+        this.canClick = true;
       }, 1000);
 
       this.cards[idx1] = newCards[0]
     } else if (newCards.length === 2) {
       this.cards[idx2] = newCards[0];
       this.cards[idx1] = newCards[1];
+      setTimeout(function() {
+        $('.card').removeClass('front back').addClass('back').empty();
+        this.canClick = true;
+      }, 1000);
     }
   } else {
     this.score -= 1;
+    setTimeout(function() {
+      $('.card').removeClass('front back').addClass('back').empty();
+      this.canClick = true;
+    }, 2000);
   }
 
   this.selectedCards = [];

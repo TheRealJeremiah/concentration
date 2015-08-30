@@ -14,14 +14,18 @@
  *= require_self
  */
 
+ @import "bootstrap-sprockets";
+ @import "bootstrap";
+
 .card {
   float: left;
+  font-weight: bold;
   width: 80px;
   height: 80px;
   border-radius: 15px;
   border: thin solid black;
   margin: 10px 10px 0px 0px;
-  padding: 30px 30px;
+  padding: 10px 10px;
 }
 
 .front {
